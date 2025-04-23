@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Flow: PrepWise
 
-## Getting Started
+PrepWise is an AI-powered platform for preparing for mock interviews. It enables users to practice interviews in real time with an AI interviewer, receive feedback, and track their progress. The system leverages Next.js, Firebase, and AI services (Google Gemini, OpenAI, Vapi AI) to deliver seamless, interactive interview experiences.
 
-First, run the development server:
+## High-Level Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend:** Built with Next.js and React, using Tailwind CSS for styling.
+- **Backend:** Uses Firebase (Firestore for data, Auth for authentication) and server actions in Next.js.
+- **AI Services:** Integrates with Vapi AI for real-time voice interviews and Google/OpenAI for feedback generation.
+
+## Main Features & Flow
+
+1. **Authentication:** Users sign up or log in (Firebase Auth).
+2. **Dashboard:** Users see their past interviews and can start a new one.
+3. **Interview Generation:**
+   - User requests a new interview (role, tech stack, etc.).
+   - AI generates interview questions.
+   - User joins a real-time voice interview with the AI (via Vapi AI).
+4. **Interview Session:**
+   - User interacts (voice) with the AI interviewer.
+   - Conversation is transcribed and stored.
+5. **Feedback Generation:**
+   - After the interview, the transcript is sent to an AI model (Google Gemini) for structured feedback (scores, strengths, areas for improvement).
+   - Feedback is saved and shown to the user.
+6. **Review & Retake:**
+   - Users can review feedback and retake interviews.
+
+## Key Components
+
+- `app/(root)/page.tsx`: Dashboard/homepage, shows interviews.
+- `app/(root)/interview/page.tsx`: Generates a new interview.
+- `app/(root)/interview/[id]/page.tsx`: Displays a specific interview session.
+- `app/(root)/interview/[id]/feedback/page.tsx`: Shows feedback for an interview.
+- `components/Agent.tsx`: Handles real-time AI interview logic (call state, messaging, Vapi integration).
+- `lib/actions/general.action.ts`: Server actions for fetching interviews, feedback, etc.
+- `firebase/`: Firebase admin and client config.
+- `constants/`: Interviewer prompt, dummy data, and config.
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant ServerActions
+    participant Firebase
+    participant VapiAI
+    participant AIModel
+
+    User->>Frontend: Sign in / Sign up
+    Frontend->>Firebase: Authenticate
+    Firebase-->>Frontend: Auth token
+    User->>Frontend: Start new interview
+    Frontend->>ServerActions: Generate interview (role, techstack)
+    ServerActions->>AIModel: Generate questions
+    AIModel-->>ServerActions: Questions
+    ServerActions->>Firebase: Save interview
+    Frontend-->>User: Show interview session
+    User->>Frontend: Join interview (voice)
+    Frontend->>VapiAI: Start call session
+    VapiAI-->>Frontend: Real-time voice interaction
+    Frontend->>Firebase: Save transcript
+    User->>Frontend: End interview
+    Frontend->>ServerActions: Request feedback
+    ServerActions->>AIModel: Analyze transcript
+    AIModel-->>ServerActions: Structured feedback
+    ServerActions->>Firebase: Save feedback
+    Frontend-->>User: Show feedback
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This document provides a high-level overview and sequence diagram for the PrepWise project. For more details, see the README or explore specific components in the codebase.
