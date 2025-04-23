@@ -4,10 +4,11 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import DisplayTechIcons from "./DisplayTechIcons";
+import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
 
-export default function InterviewCard(props: InterviewCardProps) {
+export default async function InterviewCard(props: InterviewCardProps) {
   const { id, userId, role, type, techstack, createdAt } = props;
-  const feedback = null as Feedback | null;
+  const feedback = userId && id ? await getFeedbackByInterviewId({ interviewId: id, userId }) : null;
   const normalizedType = /mix/gi.test(type) ? 'Mixed' : type;
   const formattedDate = dayjs(feedback?.createdAt || createdAt || Date.now()).format('D MMM, YYYY');
 
